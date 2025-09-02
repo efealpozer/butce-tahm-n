@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Bütçe Tahmin Aracı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px 35px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 25px; font-size: 24px; }
+        input[type="number"] { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; background-color: #4caf50; color: white; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        button:hover { background-color: #45a049; }
+        #sonuc { margin-top: 20px; text-align: center; font-size: 18px; color: #333; }
+        canvas { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Akıllı Bütçe Tahmin Aracı</h1>
+        <input id="gelir" type="number" placeholder="Gelir (TL)">
+        <input id="gider" type="number" placeholder="Gider (TL)">
+        <input id="hedef" type="number" placeholder="Hedef Birikim (TL)">
+        <button onclick="hesapla()">Tahmin Et</button>
+        <p id="sonuc"></p>
+        <canvas id="grafik" width="350" height="200"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function hesapla() {
+            let gelir = parseFloat(document.getElementById("gelir").value);
+            let gider = parseFloat(document.getElementById("gider").value);
+            let hedef = parseFloat(document.getElementById("hedef").value);
+            if(isNaN(gelir) || isNaN(gider) || isNaN(hedef) || gelir <= gider){
+                document.getElementById("sonuc").innerText = "Gelir giderden büyük olmalı ve tüm alanlar dolu olmalı!";
+                return;
+            }
+            let ay = Math.ceil(hedef / (gelir - gider));
+            document.getElementById("sonuc").innerText = `Hedefinize ${ay} ayda ulaşabilirsiniz.\nTasarruf yaparsanız 1-2 ay daha kazanabilirsiniz.`;
+
+            let birikim = [];
+            for(let i=1; i<=ay; i++){
+                birikim.push((gelir - gider)*i);
+            }
+
+            const ctx = document.getElementById('grafik').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: ay}, (_, i) => i+1 + ' Ay'),
+                    datasets: [{
+                        label: 'Tahmini Birikim (TL)',
+                        data: birikim,
+                        borderColor: '#4caf50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
